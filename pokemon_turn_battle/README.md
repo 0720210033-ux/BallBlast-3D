@@ -8,7 +8,21 @@ desktop quanto no celular (touch).
 > referência de gameplay; os "sprites" são gerados proceduralmente em código
 > (pixel art simétrica, sem usar nenhuma arte extraída de jogos oficiais).
 
-## Como abrir
+## Jogar agora (sem instalar nada)
+
+Este ambiente não tem o editor/templates do Godot instalados nem acesso de
+rede para baixá-los, então junto do projeto Godot também existe um **build
+jogável em HTML/JS** que reproduz o mesmo jogo (mesmos dados, mesma lógica de
+batalha, mesmo visual) e roda direto no navegador:
+
+- Abra `web_build/index.html` em qualquer navegador (PC ou celular) — é um
+  arquivo único, sem dependências, sem servidor, sem instalação.
+
+Esse build é a versão "já extraída" para jogar. O projeto Godot continua
+sendo a fonte principal para quem quiser abrir no editor e continuar
+expandindo.
+
+## Como abrir o projeto Godot
 
 1. Abra o Godot 4 (recomendado 4.3+).
 2. "Importar" → selecione a pasta `pokemon_turn_battle/` (o arquivo
@@ -18,8 +32,9 @@ desktop quanto no celular (touch).
 No celular: o projeto já está configurado em modo paisagem (`landscape`),
 com `stretch mode = canvas_items` para escalar bem em qualquer proporção de
 tela, e o renderer está fixado em `gl_compatibility` para rodar até em
-aparelhos mais fracos. Para exportar, use os presets padrão de
-Android/iOS/Web do Godot (não incluídos aqui — dependem de SDKs locais).
+aparelhos mais fracos. Para exportar de verdade (APK/IPA/HTML5 oficial do
+Godot), use os presets padrão de Android/iOS/Web do Godot — dependem de
+SDKs/templates locais que este ambiente não tem.
 
 ## Fluxo do jogo
 
@@ -50,6 +65,8 @@ scenes/
   Main.tscn
   StarterSelect.tscn
   Battle.tscn
+web_build/
+  index.html          # build jogável em HTML/JS puro (mesma lógica, sem Godot)
 ```
 
 `BattleManager` é o "motor" da batalha: não sabe nada sobre botões, labels ou
@@ -104,6 +121,16 @@ qualquer um desses como inicial na tela de seleção.
       (basta trocar a textura carregada, a interface não muda)
 - [ ] Música/efeitos sonoros (não incluídos nesta demo)
 - [ ] Fonte pixelada (ex.: "Press Start 2P") para reforçar o visual retrô
+
+## Sobre o web_build/
+
+`web_build/index.html` é uma reimplementação independente em JavaScript puro
+(sem frameworks) da mesma Pokédex, da mesma fórmula de dano e do mesmo fluxo
+de batalha do projeto Godot — pensada para ser aberta direto no navegador
+sem qualquer instalação. Ela não lê os arquivos `.gd`/`.tscn`; os dados foram
+duplicados manualmente lá dentro. Se você alterar a Pokédex ou a fórmula de
+dano no lado Godot (`pokemon_database.gd` / `battle_manager.gd`), replique a
+mudança em `web_build/index.html` para os dois ficarem em sincronia.
 
 ## Notas técnicas
 
