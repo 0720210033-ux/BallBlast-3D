@@ -44,6 +44,12 @@ SDKs/templates locais que este ambiente não tem.
 `Main.tscn` (menu) → `StarterSelect.tscn` (escolha do inicial) →
 `Battle.tscn` (batalha contra um Pokémon aleatório).
 
+No `web_build/index.html` o fluxo é mais completo: menu → escolha do
+inicial → **mapa de exploração** (uma vila original, com D-pad na tela) →
+batalhas contra Pokémon selvagens (na grama alta), treinadores e um líder
+de ginásio, todos com diálogo próprio. Veja
+[Sobre o web_build](#sobre-o-web_build).
+
 ## Arquitetura
 
 ```
@@ -100,11 +106,17 @@ são calculados a partir do nível usando a fórmula real da série principal
 
 ## Pokémon incluídos nesta demo
 
-Iniciais (estágio 1) de **Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos, Alola,
-Galar e Paldea** (geração mais recente incluída aqui), além de um bônus de
-**Hisui** com as formas regionais evoluídas de *Legends: Arceus*
-(Decidueye, Typhlosion e Samurott de Hisui). O jogador pode escolher
-qualquer um desses como inicial na tela de seleção.
+Iniciais (estágio 1, nível 5) de **Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos,
+Alola, Galar e Paldea** (geração mais recente incluída aqui), além de
+**Hisui**, com os três iniciais reais de *Legends: Arceus* (Rowlet,
+Cyndaquil e Oshawott). O jogador pode escolher qualquer um desses como
+inicial na tela de seleção.
+
+> **Correção:** a aba de Hisui chegou a listar as formas *evoluídas* de
+> Legends: Arceus (Decidueye/Typhlosion/Samurott de Hisui), que são Pokémon
+> de estágio final — escolher um deles dava uma vantagem enorme e injusta
+> sobre qualquer outro inicial de nível 1. Corrigido para usar os status
+> reais de nível 1 dos três iniciais daquele jogo.
 
 > Não encontrei nenhum jogo oficial da franquia chamado "Winds e Waves" — se
 > você tinha um título específico em mente (ou uma fan game/ROM hack), me
@@ -113,6 +125,12 @@ qualquer um desses como inicial na tela de seleção.
 
 ## Roadmap de expansão (a demo foi feita para crescer)
 
+- [x] Mapa de exploração com movimento (só no `web_build/`, ver acima)
+- [x] Treinadores com diálogo próprio e ginásio com líder (só no `web_build/`)
+- [x] Centro Pokémon (cura o time) (só no `web_build/`)
+- [ ] Portar o mapa/exploração para o projeto Godot (hoje só existe na
+      versão web)
+- [ ] Mais de uma rota/mapa, com progressão entre eles
 - [ ] Efetividade de tipo (tabela fraco/forte contra) no `calculate_damage`
 - [ ] Golpes críticos, STAB, ataques especiais (Atq./Def. especiais)
 - [ ] Status (paralisia, veneno, sono, confusão...)
@@ -145,6 +163,31 @@ funcionando offline/sem rede. Os direitos de imagem dos Pokémon pertencem à
 Nintendo/Game Freak/Creatures Inc. — uso apenas para fins educacionais/fã.
 O projeto Godot (`pixel_sprite_generator.gd`) continua usando sprites
 gerados por código, não estas imagens.
+
+### Exploração, ginásio, centro e treinadores
+
+O `web_build/index.html` tem um mapa jogável (view `#view-explore`):
+
+- Uma vila com um Centro Pokémon (cura o time), um Ginásio (batalha contra
+  um Líder) e dois treinadores — todos com nome e diálogo **originais**,
+  escritos para esta demo.
+- Movimento por D-pad na tela (touch) ou setas/WASD (teclado), colisão com
+  árvores/paredes, grama alta com chance de encontro selvagem.
+- Cada treinador tem um time fixo (mesma espécie/nível sempre, como nos
+  jogos oficiais) e não pode ser desafiado de novo depois de derrotado.
+  Fugir (`FUGIR`) só é permitido em batalhas selvagens — contra treinador
+  ou líder de ginásio o botão fica desabilitado, como no gênero.
+- Perder uma batalha cura o time automaticamente e "acorda" o jogador perto
+  do Centro Pokémon (blackout clássico da série).
+
+**Sobre copiar o FireRed "direto do GitHub":** decidi não fazer isso. Existem
+disassemblies completos do FireRed no GitHub (ex.: `pret/pokefirered`), mas
+eles reconstroem o jogo inteiro — mapas, falas de personagens, times de
+treinador, tudo — que é conteúdo autoral da Nintendo/Game Freak protegido por
+direitos autorais. Copiar isso (mesmo trocando nomes) seria reproduzir uma
+obra comercial inteira, não uma demo inspirada nela. Por isso o mapa, os
+nomes dos treinadores e todo o diálogo aqui são escritos originalmente,
+seguindo a mesma estrutura de jogo (rota → treinador → ginásio → centro).
 
 ## Notas técnicas
 
