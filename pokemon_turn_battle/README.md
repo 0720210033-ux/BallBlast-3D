@@ -128,6 +128,10 @@ inicial na tela de seleção.
 - [x] Mapa de exploração com movimento (só no `web_build/`, ver acima)
 - [x] Treinadores com diálogo próprio e ginásio com líder (só no `web_build/`)
 - [x] Centro Pokémon (cura o time) (só no `web_build/`)
+- [x] Ícones originais para NPCs/prédios no mapa (círculo colorido com
+      inicial por treinador; silhueta de prédio + emblema + etiqueta de
+      texto para Centro/Ginásio) — antes todos os NPCs usavam o mesmo
+      emoji de carinha, o que tornava impossível diferenciá-los
 - [ ] Portar o mapa/exploração para o projeto Godot (hoje só existe na
       versão web)
 - [ ] Mais de uma rota/mapa, com progressão entre eles

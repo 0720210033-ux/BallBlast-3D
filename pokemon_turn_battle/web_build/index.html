@@ -455,14 +455,88 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(0.7rem, 3vw, 1.1rem);
     transition: left 0.12s linear, top 0.12s linear;
     pointer-events: none;
   }
-  .player-token { color: var(--gb-darkest); z-index: 2; }
-  .npc-token { color: var(--gb-darkest); }
-  .npc-token.npc-center { color: var(--hp-red); }
-  .npc-token.npc-gym { color: var(--led-red); }
+  .player-token {
+    z-index: 2;
+    font-size: clamp(0.6rem, 2.6vw, 0.95rem);
+  }
+  .player-token__dot {
+    width: 62%;
+    height: 62%;
+    border-radius: 50%;
+    background: var(--led-red);
+    border: 1.5px solid var(--gb-darkest);
+    box-shadow: 0 0 0 2px var(--gb-lightest);
+  }
+  .npc-token { z-index: 1; }
+
+  /* Treinadores: círculo colorido com a inicial do nome — cada um com sua
+     própria cor, pra não virar "todo mundo com a mesma carinha". */
+  .npc-trainer-badge {
+    width: 68%;
+    height: 68%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.42rem, 1.8vw, 0.62rem);
+    font-weight: 700;
+    color: var(--paper);
+    border: 1.5px solid var(--gb-darkest);
+  }
+
+  /* Ginásio/Centro: silhueta de prédio (telhado + parede) + emblema +
+     etiqueta de texto, pra não depender só do ícone. */
+  .npc-building {
+    position: relative;
+    width: 72%;
+    height: 78%;
+  }
+  .npc-building__roof {
+    position: absolute;
+    top: 0;
+    left: 6%;
+    width: 88%;
+    height: 42%;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    background: var(--gb-darkest);
+  }
+  .npc-building__wall {
+    position: absolute;
+    bottom: 0;
+    left: 16%;
+    width: 68%;
+    height: 60%;
+    background: var(--paper);
+    border: 1.5px solid var(--gb-darkest);
+    border-top: none;
+  }
+  .npc-building__badge {
+    position: absolute;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(0.4rem, 1.6vw, 0.56rem);
+    line-height: 1;
+  }
+  .npc-gym .npc-building__roof { background: var(--led-red); }
+  .npc-label {
+    position: absolute;
+    bottom: -34%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(0.32rem, 1.3vw, 0.46rem);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    background: var(--paper);
+    color: var(--gb-darkest);
+    padding: 0 3px;
+    border: 1px solid var(--gb-darkest);
+    border-radius: 2px;
+    z-index: 5;
+  }
 
   .explore-exit {
     position: absolute;
@@ -727,7 +801,7 @@
 
           <div class="map-viewport" id="mapViewport">
             <div class="map-grid" id="mapGrid"></div>
-            <div class="player-token" id="playerToken">☻</div>
+            <div class="player-token" id="playerToken"><span class="player-token__dot"></span></div>
           </div>
 
           <button class="explore-exit" id="btnExploreExit" type="button" aria-label="Voltar ao título">✕</button>
@@ -1145,6 +1219,7 @@
     },
     {
       id: "trainer1", x: 2, y: 4, kind: "trainer", name: "Treinador Davi", speciesId: 2, level: 7, defeated: false,
+      shortLabel: "D", color: "#e6664d",
       introLines: ["Treinador Davi: Ei! Vamos ver do que seu Pokémon é capaz!"],
       winLines: ["Treinador Davi: Nossa, fui superado..."],
       loseLines: ["Treinador Davi: Ainda bem que treino bastante!"],
@@ -1152,6 +1227,7 @@
     },
     {
       id: "trainer2", x: 6, y: 4, kind: "trainer", name: "Treinadora Ana", speciesId: 21, level: 8, defeated: false,
+      shortLabel: "A", color: "#4d99d9",
       introLines: ["Treinadora Ana: Não vou facilitar!"],
       winLines: ["Treinadora Ana: Você é forte mesmo!"],
       loseLines: ["Treinadora Ana: Treine mais um pouco!"],
@@ -1203,8 +1279,29 @@
     NPCS.forEach(function (npc) {
       var token = document.createElement("div");
       token.className = "npc-token npc-" + npc.kind;
-      token.textContent = npc.kind === "center" ? "✚" : npc.kind === "gym" ? "★" : "☺";
       positionToken(token, npc.x, npc.y);
+
+      if (npc.kind === "trainer") {
+        var badge = document.createElement("span");
+        badge.className = "npc-trainer-badge";
+        badge.style.background = npc.color;
+        badge.textContent = npc.shortLabel;
+        token.appendChild(badge);
+      } else {
+        var building = document.createElement("span");
+        building.className = "npc-building";
+        building.innerHTML =
+          '<span class="npc-building__roof"></span>' +
+          '<span class="npc-building__wall"></span>' +
+          '<span class="npc-building__badge">' + (npc.kind === "center" ? "✚" : "★") + "</span>";
+        token.appendChild(building);
+
+        var label = document.createElement("span");
+        label.className = "npc-label";
+        label.textContent = npc.kind === "center" ? "CENTRO" : "GINÁSIO";
+        token.appendChild(label);
+      }
+
       mapViewport.appendChild(token);
     });
   }
