@@ -472,26 +472,23 @@
   }
   .npc-token { z-index: 1; }
 
-  /* Treinadores: emblema colorido com um ícone de pessoa (silhueta
-     genérica, não é retrato de ninguém) — cada um com sua própria cor,
-     pra dar pra diferenciar um do outro à primeira vista. */
+  /* Treinadores: ícone em pixel art (silhueta genérica de pessoa,
+     desenhada à mão pra esta demo) tingido com a cor de cada treinador —
+     não é retrato de ninguém, só uma forma simples pra diferenciar um
+     treinador do outro à primeira vista. */
   .npc-trainer-badge {
-    width: 70%;
-    height: 70%;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid var(--gb-darkest);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    width: 78%;
+    height: 78%;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
   }
-  .npc-trainer-badge svg { width: 62%; height: 62%; }
 
-  /* Ginásio/Centro: ícone de prédio (SVG original desenhado pra esta
-     demo) + etiqueta de texto, pra não depender só do desenho. */
+  /* Ginásio/Centro: ícone de prédio em pixel art (também desenhado à mão)
+     + etiqueta de texto, pra não depender só do desenho. */
   .npc-building-icon {
-    width: 82%;
-    height: 82%;
+    width: 88%;
+    height: 88%;
+    image-rendering: pixelated;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
   }
   .npc-label {
@@ -1167,25 +1164,102 @@
   });
 
   // ---------- Exploração (mapa original, sem nenhum dado extraído de jogo) ----------
-  // Ícones em SVG desenhados para esta demo (pictogramas genéricos —
-  // pessoa, casa, cruz, estrela — não são retrato de nenhum personagem
-  // nem sprite extraído de jogo nenhum).
-  var ICON_PERSON =
-    '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-    '<circle cx="12" cy="7.5" r="4.2" fill="#eef0e2"/>' +
-    '<path d="M3.5 21c0-5 3.8-9 8.5-9s8.5 4 8.5 9" fill="#eef0e2"/>' +
-    "</svg>";
-  var ICON_BUILDING_CROSS =
-    '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-    '<path d="M3 11.5 L12 4 L21 11.5 V20 H3 Z" fill="#eef0e2" stroke="#0f380f" stroke-width="1.3" stroke-linejoin="round"/>' +
-    '<rect x="10.4" y="11.8" width="3.2" height="8" fill="#d1372f"/>' +
-    '<rect x="7.6" y="14.6" width="8.8" height="3.2" fill="#d1372f"/>' +
-    "</svg>";
-  var ICON_BUILDING_STAR =
-    '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-    '<path d="M3 11.5 L12 4 L21 11.5 V20 H3 Z" fill="#eef0e2" stroke="#0f380f" stroke-width="1.3" stroke-linejoin="round"/>' +
-    '<path d="M12 12 L13.6 15 L16.8 15.4 L14.4 17.6 L15.1 20.8 L12 19 L8.9 20.8 L9.6 17.6 L7.2 15.4 L10.4 15 Z" fill="#f8d030" stroke="#0f380f" stroke-width="0.5" stroke-linejoin="round"/>' +
-    "</svg>";
+  // Ícones em pixel art desenhados à mão para esta demo (silhueta genérica
+  // de pessoa, silhueta genérica de casa com emblema) — não são sprite de
+  // nenhum personagem nem prédio extraído de jogo nenhum, só formas
+  // simples rasterizadas num grid pequeno pra combinar com o resto do
+  // visual "Game Boy" pixelado.
+  var PATTERN_PERSON = [
+    "............",
+    "....BBBB....",
+    "....BBBB....",
+    "....BBBB....",
+    "....BBBB....",
+    "............",
+    ".BBBBBBBBBB.",
+    ".BBBBBBBBBB.",
+    ".BBBBBBBBBB.",
+    ".BBBBBBBBBB.",
+    ".BBBBBBBBBB.",
+    ".BBBBBBBBBB.",
+    ".BBBBBBBBBB.",
+    "............",
+  ];
+  var PATTERN_BUILDING_CROSS = [
+    "..............",
+    "......RR......",
+    ".....RRRR.....",
+    "....RRRRRR....",
+    "...RRRRRRRR...",
+    "..RRRRRRRRRR..",
+    ".RRRRRRRRRRRR.",
+    ".WWWWWWWWWWWW.",
+    ".WWWWWXXWWWWW.",
+    ".WWWWWXXWWWWW.",
+    ".WWWXXXXXXWWW.",
+    ".WWWWWXXWWWWW.",
+    ".WWWWWWWWWWWW.",
+    "..............",
+  ];
+  var PATTERN_BUILDING_STAR = [
+    "..............",
+    "......RR......",
+    ".....RRRR.....",
+    "....RRRRRR....",
+    "...RRRRRRRR...",
+    "..RRRRRRRRRR..",
+    ".RRRRRRRRRRRR.",
+    ".WWWWWWWWWWWW.",
+    ".WWWWWXXWWWWW.",
+    ".WWWWXXXXWWWW.",
+    ".WWWWXXXXWWWW.",
+    ".WWWWWXXWWWWW.",
+    ".WWWWWWWWWWWW.",
+    "..............",
+  ];
+
+  function drawPixelIcon(pattern, colors) {
+    var h = pattern.length, w = pattern[0].length;
+    var canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext("2d");
+    var filled = pattern.map(function (row) {
+      return row.split("").map(function (c) { return c !== "."; });
+    });
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        if (!filled[y][x]) continue;
+        ctx.fillStyle = colors[pattern[y][x]];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+    for (var yy = 0; yy < h; yy++) {
+      for (var xx = 0; xx < w; xx++) {
+        if (filled[yy][xx]) continue;
+        var hasNeighbor =
+          (xx > 0 && filled[yy][xx - 1]) || (xx < w - 1 && filled[yy][xx + 1]) ||
+          (yy > 0 && filled[yy - 1][xx]) || (yy < h - 1 && filled[yy + 1][xx]);
+        if (hasNeighbor) { ctx.fillStyle = colors["*"]; ctx.fillRect(xx, yy, 1, 1); }
+      }
+    }
+    return canvas.toDataURL();
+  }
+
+  var iconCache = {};
+  function trainerIconUrl(color) {
+    var key = "person:" + color;
+    if (!iconCache[key]) iconCache[key] = drawPixelIcon(PATTERN_PERSON, { B: color, "*": "#0f380f" });
+    return iconCache[key];
+  }
+  function buildingIconUrl(kind) {
+    var key = "building:" + kind;
+    if (!iconCache[key]) {
+      var pattern = kind === "center" ? PATTERN_BUILDING_CROSS : PATTERN_BUILDING_STAR;
+      var badgeColor = kind === "center" ? "#d1372f" : "#f8d030";
+      iconCache[key] = drawPixelIcon(pattern, { R: "#0f380f", W: "#eef0e2", X: badgeColor, "*": "#0f380f" });
+    }
+    return iconCache[key];
+  }
 
   var MAP_COLS = 9;
   var MAP_ROWS = 7;
@@ -1278,15 +1352,16 @@
       positionToken(token, npc.x, npc.y);
 
       if (npc.kind === "trainer") {
-        var badge = document.createElement("span");
+        var badge = document.createElement("img");
         badge.className = "npc-trainer-badge";
-        badge.style.background = npc.color;
-        badge.innerHTML = ICON_PERSON;
+        badge.src = trainerIconUrl(npc.color);
+        badge.alt = npc.name;
         token.appendChild(badge);
       } else {
-        var icon = document.createElement("span");
+        var icon = document.createElement("img");
         icon.className = "npc-building-icon";
-        icon.innerHTML = npc.kind === "center" ? ICON_BUILDING_CROSS : ICON_BUILDING_STAR;
+        icon.src = buildingIconUrl(npc.kind);
+        icon.alt = npc.kind === "center" ? "Centro Pokémon" : "Ginásio";
         token.appendChild(icon);
 
         var label = document.createElement("span");

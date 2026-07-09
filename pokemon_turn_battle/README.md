@@ -130,10 +130,12 @@ O jogador pode escolher qualquer um desses como inicial na tela de seleção.
 - [x] Mapa de exploração com movimento (só no `web_build/`, ver acima)
 - [x] Treinadores com diálogo próprio e ginásio com líder (só no `web_build/`)
 - [x] Centro Pokémon (cura o time) (só no `web_build/`)
-- [x] Ícones em SVG originais para NPCs/prédios no mapa (emblema colorido
-      com pictograma de pessoa por treinador; ícone de casa com cruz/estrela
-      + etiqueta de texto para Centro/Ginásio) — desenhados do zero para
-      esta demo, não são sprites extraídos de nenhum jogo
+- [x] Ícones em pixel art originais para NPCs/prédios no mapa (silhueta de
+      pessoa tingida por treinador; casa com cruz/emblema + etiqueta de
+      texto para Centro/Ginásio) — desenhados à mão pixel a pixel para
+      esta demo (`drawPixelIcon`/`PATTERN_*` no `web_build/`), no mesmo
+      estilo "Game Boy" do resto do jogo; não são sprites extraídos de
+      nenhum jogo
 - [ ] Portar o mapa/exploração para o projeto Godot (hoje só existe na
       versão web)
 - [ ] Mais de uma rota/mapa, com progressão entre eles
