@@ -138,12 +138,14 @@ func _build_database() -> void:
 	starters_by_region["Galar"] = galar
 	id += 3
 
-	# --- Hisui (Legends: Arceus) — os 3 iniciais reais do jogo (nível 1,
-	# mesmas espécies/status de Johto/Alola/Unova; ver nota no README) ---
+	# --- Hisui (Legends: Arceus) — nomes/tipos reais das formas evoluídas
+	# de Hisui, mas com status recalibrados para nível de inicial (ver nota
+	# no README: os status reais desses três são de Pokémon já evoluído, e
+	# usá-los sem ajuste dava vantagem injusta sobre qualquer outro inicial) ---
 	var hisui: Array[PokemonSpecies] = [
-		_make_species(id, "Rowlet (Hisui)", "Hisui", "Grama", "Voador", 68, 55, 55, 42, Color(0.45, 0.7, 0.4), "Investida de Folhas", 45),
-		_make_species(id + 1, "Cyndaquil (Hisui)", "Hisui", "Fogo", "", 39, 52, 43, 65, Color(0.9, 0.5, 0.2), "Brasa", 40),
-		_make_species(id + 2, "Oshawott (Hisui)", "Hisui", "Água", "", 55, 55, 45, 45, Color(0.3, 0.55, 0.9), "Jato d'Água", 40),
+		_make_species(id, "Decidueye de Hisui", "Hisui", "Grama", "Lutador", 68, 65, 55, 68, Color(0.35, 0.6, 0.35), "Folha Navalha", 45),
+		_make_species(id + 1, "Typhlosion de Hisui", "Hisui", "Fogo", "Fantasma", 60, 60, 50, 70, Color(0.55, 0.35, 0.75), "Chama Fantasma", 45),
+		_make_species(id + 2, "Samurott de Hisui", "Hisui", "Água", "Sombrio", 65, 68, 58, 50, Color(0.25, 0.4, 0.55), "Corte Noturno", 45),
 	]
 	starters_by_region["Hisui"] = hisui
 	id += 3

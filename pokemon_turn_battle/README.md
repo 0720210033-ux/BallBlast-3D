@@ -107,16 +107,18 @@ são calculados a partir do nível usando a fórmula real da série principal
 ## Pokémon incluídos nesta demo
 
 Iniciais (estágio 1, nível 5) de **Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos,
-Alola, Galar e Paldea** (geração mais recente incluída aqui), além de
-**Hisui**, com os três iniciais reais de *Legends: Arceus* (Rowlet,
-Cyndaquil e Oshawott). O jogador pode escolher qualquer um desses como
-inicial na tela de seleção.
+Alola, Galar e Paldea** (geração mais recente incluída aqui), além de um
+bônus de **Hisui** com as formas regionais evoluídas de *Legends: Arceus*
+(Decidueye, Typhlosion e Samurott de Hisui) — nome, tipo e sprite reais.
+O jogador pode escolher qualquer um desses como inicial na tela de seleção.
 
-> **Correção:** a aba de Hisui chegou a listar as formas *evoluídas* de
-> Legends: Arceus (Decidueye/Typhlosion/Samurott de Hisui), que são Pokémon
-> de estágio final — escolher um deles dava uma vantagem enorme e injusta
-> sobre qualquer outro inicial de nível 1. Corrigido para usar os status
-> reais de nível 1 dos três iniciais daquele jogo.
+> **Nota de balanceamento:** os três de Hisui são, na verdade, Pokémon já
+> evoluídos (estágio final) — usar os status *reais* deles daria uma
+> vantagem enorme e injusta sobre qualquer outro inicial de nível 1. Por
+> isso os status desses três foram recalibrados para a faixa de um inicial
+> comum (parecido com os outros 27), mantendo nome, tipo e aparência reais.
+> Isso é só um ajuste de jogo (`base_hp`/`base_attack`/etc. em
+> `pokemon_database.gd` e no `web_build/`) — não muda quem eles são.
 
 > Não encontrei nenhum jogo oficial da franquia chamado "Winds e Waves" — se
 > você tinha um título específico em mente (ou uma fan game/ROM hack), me
@@ -128,10 +130,10 @@ inicial na tela de seleção.
 - [x] Mapa de exploração com movimento (só no `web_build/`, ver acima)
 - [x] Treinadores com diálogo próprio e ginásio com líder (só no `web_build/`)
 - [x] Centro Pokémon (cura o time) (só no `web_build/`)
-- [x] Ícones originais para NPCs/prédios no mapa (círculo colorido com
-      inicial por treinador; silhueta de prédio + emblema + etiqueta de
-      texto para Centro/Ginásio) — antes todos os NPCs usavam o mesmo
-      emoji de carinha, o que tornava impossível diferenciá-los
+- [x] Ícones em SVG originais para NPCs/prédios no mapa (emblema colorido
+      com pictograma de pessoa por treinador; ícone de casa com cruz/estrela
+      + etiqueta de texto para Centro/Ginásio) — desenhados do zero para
+      esta demo, não são sprites extraídos de nenhum jogo
 - [ ] Portar o mapa/exploração para o projeto Godot (hoje só existe na
       versão web)
 - [ ] Mais de uma rota/mapa, com progressão entre eles
