@@ -1169,53 +1169,46 @@
   // nenhum personagem nem prédio extraído de jogo nenhum, só formas
   // simples rasterizadas num grid pequeno pra combinar com o resto do
   // visual "Game Boy" pixelado.
+  // Boneco com boné (C = cor do treinador), rosto (F), olhos (E) e calça (P).
   var PATTERN_PERSON = [
-    "............",
-    "....BBBB....",
-    "....BBBB....",
-    "....BBBB....",
-    "....BBBB....",
-    "............",
-    ".BBBBBBBBBB.",
-    ".BBBBBBBBBB.",
-    ".BBBBBBBBBB.",
-    ".BBBBBBBBBB.",
-    ".BBBBBBBBBB.",
-    ".BBBBBBBBBB.",
-    ".BBBBBBBBBB.",
-    "............",
+    "..............",
+    "....CCCCCC....",
+    "....CCCCCC....",
+    "....FFFFFF....",
+    "....FFFFFF....",
+    "....FEFFEF....",
+    "....FFFFFF....",
+    ".....FFFF.....",
+    "..CCCCCCCCCC..",
+    "..CCCCCCCCCC..",
+    "..CCCCCCCCCC..",
+    "..CCCCCCCCCC..",
+    "..CCCCCCCCCC..",
+    "..CCCCCCCCCC..",
+    "....PPPPPP....",
+    "....PPPPPP....",
+    "....PPPPPP....",
+    "....PPPPPP....",
   ];
-  var PATTERN_BUILDING_CROSS = [
-    "..............",
-    "......RR......",
-    ".....RRRR.....",
-    "....RRRRRR....",
-    "...RRRRRRRR...",
-    "..RRRRRRRRRR..",
-    ".RRRRRRRRRRRR.",
-    ".WWWWWWWWWWWW.",
-    ".WWWWWXXWWWWW.",
-    ".WWWWWXXWWWWW.",
-    ".WWWXXXXXXWWW.",
-    ".WWWWWXXWWWWW.",
-    ".WWWWWWWWWWWW.",
-    "..............",
-  ];
-  var PATTERN_BUILDING_STAR = [
-    "..............",
-    "......RR......",
-    ".....RRRR.....",
-    "....RRRRRR....",
-    "...RRRRRRRR...",
-    "..RRRRRRRRRR..",
-    ".RRRRRRRRRRRR.",
-    ".WWWWWWWWWWWW.",
-    ".WWWWWXXWWWWW.",
-    ".WWWWXXXXWWWW.",
-    ".WWWWXXXXWWWW.",
-    ".WWWWWXXWWWWW.",
-    ".WWWWWWWWWWWW.",
-    "..............",
+  // Casinha com telhado (R), parede (W), janelas (N), porta (D) e um
+  // emblema (X) na ponta do telhado que muda de cor conforme o local.
+  var PATTERN_BUILDING = [
+    "................",
+    ".......XX.......",
+    "......RRRR......",
+    ".....RRRRRR.....",
+    "....RRRRRRRR....",
+    "...RRRRRRRRRR...",
+    "..RRRRRRRRRRRR..",
+    ".RRRRRRRRRRRRRR.",
+    ".WWWWWWWWWWWWWW.",
+    ".WWNNNWWWWNNNWW.",
+    ".WWNNNWWWWNNNWW.",
+    ".WWWWWWDDDWWWWW.",
+    ".WWWWWWDDDWWWWW.",
+    ".WWWWWWDDDWWWWW.",
+    ".WWWWWWDDDWWWWW.",
+    "................",
   ];
 
   function drawPixelIcon(pattern, colors) {
@@ -1248,15 +1241,20 @@
   var iconCache = {};
   function trainerIconUrl(color) {
     var key = "person:" + color;
-    if (!iconCache[key]) iconCache[key] = drawPixelIcon(PATTERN_PERSON, { B: color, "*": "#0f380f" });
+    if (!iconCache[key]) {
+      iconCache[key] = drawPixelIcon(PATTERN_PERSON, {
+        C: color, F: "#f0c8a0", E: "#0f380f", P: "#30302f", "*": "#0f380f",
+      });
+    }
     return iconCache[key];
   }
   function buildingIconUrl(kind) {
     var key = "building:" + kind;
     if (!iconCache[key]) {
-      var pattern = kind === "center" ? PATTERN_BUILDING_CROSS : PATTERN_BUILDING_STAR;
       var badgeColor = kind === "center" ? "#d1372f" : "#f8d030";
-      iconCache[key] = drawPixelIcon(pattern, { R: "#0f380f", W: "#eef0e2", X: badgeColor, "*": "#0f380f" });
+      iconCache[key] = drawPixelIcon(PATTERN_BUILDING, {
+        R: "#0f380f", W: "#eef0e2", N: "#8bacc4", D: "#6b4a2b", X: badgeColor, "*": "#0f380f",
+      });
     }
     return iconCache[key];
   }
