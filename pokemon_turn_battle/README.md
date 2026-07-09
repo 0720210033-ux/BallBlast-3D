@@ -4,9 +4,12 @@ Demo de um sistema de batalha por turnos estilo **Pokémon FireRed**, feito em
 Godot 4 / GDScript, com visual retrô "Game Boy" e pensado para rodar tanto no
 desktop quanto no celular (touch).
 
-> Projeto educacional/fã-feito. Os nomes das espécies são usados apenas como
-> referência de gameplay; os "sprites" são gerados proceduralmente em código
-> (pixel art simétrica, sem usar nenhuma arte extraída de jogos oficiais).
+> Projeto educacional/fã-feito. No projeto Godot os "sprites" são gerados
+> proceduralmente em código (pixel art simétrica, sem arte extraída de jogos
+> oficiais). Já o build `web_build/index.html` usa sprites reais dos jogos,
+> obtidos da comunidade **PokeAPI/sprites** no GitHub (veja a seção
+> [Sobre o web_build](#sobre-o-web_build)) — os direitos de imagem dos
+> Pokémon pertencem à Nintendo/Game Freak/Creatures Inc.
 
 ## Jogar agora (sem instalar nada)
 
@@ -131,6 +134,17 @@ sem qualquer instalação. Ela não lê os arquivos `.gd`/`.tscn`; os dados fora
 duplicados manualmente lá dentro. Se você alterar a Pokédex ou a fórmula de
 dano no lado Godot (`pokemon_database.gd` / `battle_manager.gd`), replique a
 mudança em `web_build/index.html` para os dois ficarem em sincronia.
+
+### Sprites
+
+Os sprites usados no `web_build/index.html` vêm do repositório comunitário
+[PokeAPI/sprites](https://github.com/PokeAPI/sprites) (mirror via jsDelivr),
+que reúne sprites extraídos dos jogos oficiais. Eles estão embutidos em
+base64 diretamente no HTML (`SPRITE_DATA_URIS`) para o arquivo continuar
+funcionando offline/sem rede. Os direitos de imagem dos Pokémon pertencem à
+Nintendo/Game Freak/Creatures Inc. — uso apenas para fins educacionais/fã.
+O projeto Godot (`pixel_sprite_generator.gd`) continua usando sprites
+gerados por código, não estas imagens.
 
 ## Notas técnicas
 
