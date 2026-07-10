@@ -125,11 +125,24 @@ O jogador pode escolher qualquer um desses como inicial na tela de seleção.
 > diga o nome exato dos Pokémon/região que quer incluir e eu adiciono no
 > banco de dados (`pokemon_database.gd`) do mesmo jeito que os outros.
 
+### Pokédex expandida (só no web_build/)
+
+Além dos 30 iniciais, `web_build/index.html` inclui os **151 Pokémon
+originais de Kanto** (nome, tipos e status reais, via PokeAPI) usados para
+dar variedade aos encontros selvagens e aos times de treinador — não é mais
+só os 30 iniciais se repetindo. Cada espécie recebe um único golpe de tipo
+atribuído automaticamente pelo tipo primário (não é um moveset real do
+jogo) — mantém a mesma fórmula de dano simples da demo.
+
 ## Roadmap de expansão (a demo foi feita para crescer)
 
 - [x] Mapa de exploração com movimento (só no `web_build/`, ver acima)
 - [x] Treinadores com diálogo próprio e ginásio com líder (só no `web_build/`)
 - [x] Centro Pokémon (cura o time) (só no `web_build/`)
+- [x] Pokédex expandida para os 151 originais de Kanto em encontros
+      selvagens/treinadores, não só os 30 iniciais (só no `web_build/`)
+- [x] Múltiplos mapas conectados — Vila Raiz ↔ Rota 1 ↔ Vila Litoral, com
+      um segundo Centro Pokémon e mais um treinador (só no `web_build/`)
 - [x] Ícones em pixel art originais para NPCs/prédios no mapa (silhueta de
       pessoa tingida por treinador; casa com cruz/emblema + etiqueta de
       texto para Centro/Ginásio) — desenhados à mão pixel a pixel para
