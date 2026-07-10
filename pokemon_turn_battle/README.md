@@ -149,6 +149,11 @@ jogo) — mantém a mesma fórmula de dano simples da demo.
       esta demo (`drawPixelIcon`/`PATTERN_*` no `web_build/`), no mesmo
       estilo "Game Boy" do resto do jogo; não são sprites extraídos de
       nenhum jogo
+- [x] Personagem do próprio jogador com sprite próprio (boné azul, camisa
+      vermelha) em vez de uma bolinha; Ginásio redesenhado com telhado
+      achatado e bandeira numa haste, bem diferente do Centro (telhado em
+      ponta + janelas + cruz), pra não parecerem "o mesmo prédio" — tudo
+      pixel art original, sem sprite de personagem/prédio extraído de jogo
 - [ ] Portar o mapa/exploração para o projeto Godot (hoje só existe na
       versão web)
 - [ ] Mais de uma rota/mapa, com progressão entre eles
