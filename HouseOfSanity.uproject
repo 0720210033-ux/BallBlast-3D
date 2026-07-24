@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.4",
+	"Category": "Horror",
+	"Description": "House of Sanity - first-person domestic horror. Do your chores, keep your sanity, survive the night.",
+	"Modules": [
+		{
+			"Name": "HouseOfSanity",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
