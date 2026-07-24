@@ -1,6 +1,7 @@
 #include "HouseOfSanityGameState.h"
 #include "Components/SanityComponent.h"
 #include "UI/GameOverWidget.h"
+#include "UI/VictoryWidget.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
@@ -17,6 +18,7 @@ void AHouseOfSanityGameState::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(AHouseOfSanityGameState, CurrentDay);
 	DOREPLIFETIME(AHouseOfSanityGameState, CurrentPhase);
 	DOREPLIFETIME(AHouseOfSanityGameState, bGameOver);
+	DOREPLIFETIME(AHouseOfSanityGameState, bHasEscaped);
 }
 
 float AHouseOfSanityGameState::GetPhaseLength(ETimePhase Phase) const
@@ -35,7 +37,7 @@ void AHouseOfSanityGameState::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (!HasAuthority())
+	if (!HasAuthority() || bHasEscaped)
 	{
 		return;
 	}
@@ -58,6 +60,11 @@ void AHouseOfSanityGameState::AdvancePhase()
 		case ETimePhase::Dawn:
 			CurrentDay++;
 			OnRep_CurrentDay();
+			if (CurrentDay >= EscapeDayNumber)
+			{
+				TriggerMotherRescue();
+				break;
+			}
 			EnterPhase(ETimePhase::Day);
 			break;
 	}
@@ -79,6 +86,24 @@ void AHouseOfSanityGameState::EnterPhase(ETimePhase NewPhase)
 	}
 
 	OnRep_CurrentPhase();
+}
+
+void AHouseOfSanityGameState::RestoreFullSanityForAllPlayers()
+{
+	for (APlayerState* PS : PlayerArray)
+	{
+		if (!PS)
+		{
+			continue;
+		}
+		if (APawn* Pawn = PS->GetPawn())
+		{
+			if (USanityComponent* Sanity = Pawn->FindComponentByClass<USanityComponent>())
+			{
+				Sanity->SetSanity(Sanity->MaxSanity);
+			}
+		}
+	}
 }
 
 void AHouseOfSanityGameState::RecoverSanityForAllSurvivors()
@@ -138,6 +163,45 @@ void AHouseOfSanityGameState::OnRep_GameOver()
 	if (GameOverWidgetClass)
 	{
 		if (UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(PC, GameOverWidgetClass))
+		{
+			Widget->AddToViewport();
+		}
+	}
+
+	FInputModeUIOnly InputMode;
+	PC->SetInputMode(InputMode);
+	PC->bShowMouseCursor = true;
+}
+
+void AHouseOfSanityGameState::TriggerMotherRescue()
+{
+	if (bHasEscaped)
+	{
+		return;
+	}
+	bHasEscaped = true;
+
+	RestoreFullSanityForAllPlayers();
+	OnMotherRescue.Broadcast(CurrentDay); // server/listen-host only, same limitation as OnNightSurvived
+	OnRep_HasEscaped();
+}
+
+void AHouseOfSanityGameState::OnRep_HasEscaped()
+{
+	if (!bHasEscaped)
+	{
+		return;
+	}
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC)
+	{
+		return;
+	}
+
+	if (VictoryWidgetClass)
+	{
+		if (UVictoryWidget* Widget = CreateWidget<UVictoryWidget>(PC, VictoryWidgetClass))
 		{
 			Widget->AddToViewport();
 		}

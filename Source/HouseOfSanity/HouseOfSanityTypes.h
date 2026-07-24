@@ -48,6 +48,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSanityDepleted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimePhaseChanged, ETimePhase, NewPhase);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNewDayBegin, int32, DayNumber);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNightSurvived, int32, DayNumber);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMotherRescue, int32, DayNumber);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHallucinationTriggered, EHallucinationType, Type);
 

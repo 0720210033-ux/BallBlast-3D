@@ -6,6 +6,7 @@
 #include "HouseOfSanityGameState.generated.h"
 
 class UGameOverWidget;
+class UVictoryWidget;
 
 // Owns the day/night clock. Ticks and advances phases only on the server
 // (or standalone); clients receive CurrentDay/CurrentPhase via replication
@@ -33,6 +34,21 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Config, BlueprintReadWrite, Category = "Cycle")
 	float SurvivalSanityRecovery = 10.f;
+
+	// The day the nightmare ends: Mom bursts in, the slipper lands, and
+	// everyone's sanity is restored on the spot - a scripted rescue, not
+	// something players can trigger or delay by playing well or badly.
+	UPROPERTY(EditDefaultsOnly, Config, BlueprintReadWrite, Category = "Ending")
+	int32 EscapeDayNumber = 70;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ending")
+	TSubclassOf<UVictoryWidget> VictoryWidgetClass;
+
+	UPROPERTY(ReplicatedUsing = OnRep_HasEscaped, BlueprintReadOnly, Category = "Ending")
+	bool bHasEscaped = false;
+
+	UPROPERTY(BlueprintAssignable, Category = "Ending")
+	FOnMotherRescue OnMotherRescue;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentDay, BlueprintReadOnly, Category = "Cycle")
 	int32 CurrentDay = 1;
@@ -68,11 +84,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "House of Sanity")
 	void NotifyGameOver();
 
+	UFUNCTION(BlueprintCallable, Category = "Ending")
+	void TriggerMotherRescue();
+
 private:
 	void AdvancePhase();
 	void EnterPhase(ETimePhase NewPhase);
 	float GetPhaseLength(ETimePhase Phase) const;
 	void RecoverSanityForAllSurvivors();
+	void RestoreFullSanityForAllPlayers();
 
 	UFUNCTION()
 	void OnRep_CurrentDay();
@@ -82,6 +102,9 @@ private:
 
 	UFUNCTION()
 	void OnRep_GameOver();
+
+	UFUNCTION()
+	void OnRep_HasEscaped();
 
 	float PhaseElapsed = 0.f;
 	bool bNightSurvivedThisCycle = false;

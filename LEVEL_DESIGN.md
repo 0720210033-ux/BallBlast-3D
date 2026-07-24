@@ -95,3 +95,12 @@ real do personagem, para a animação continuar funcionando).
 | `AChoreTakeOutTrash` | Cozinha/área de serviço, perto de uma saída |
 | `AFallHallucinationTrap` + `AFallDeathVolume` | Vão do corredor do 1º andar sobre o hall |
 | `ANightEntity` + `ANightEntityController` (múltiplas) | Uma por andar/ala, espalhadas |
+
+## O fim: dia 70
+
+`AHouseOfSanityGameState::EscapeDayNumber` (padrão 70) marca o fim
+roteirizado do jogo: ao amanhecer desse dia, a mãe entra, dá a chinelada,
+a sanidade de todos volta ao máximo e o relógio para de vez. Sugestão de
+encenação: a entrada principal (hall térreo) é o lugar natural para essa
+cutscene, já que é o mesmo ponto de onde os irmãos "escapam" — reaproveita a
+geometria em vez de precisar de um cômodo extra só para isso.

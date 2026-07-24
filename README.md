@@ -42,6 +42,11 @@ onde encaixar cada chore/entidade/armadilha).
    - o jogador cai de uma altura letal (ex.: acreditando na ilusão do
      pula-pula). Isso mata **independente da sanidade** — a ilusão só
      controla se você é convencido a pular; a física da queda é sempre real.
+5. **Dia 70 — o resgate**: ao amanhecer do dia 70 (`EscapeDayNumber`, ajustável),
+   o pesadelo acaba de forma roteirizada, não por mérito de jogo: a mãe
+   aparece, dá uma chinelada, a sanidade de todo mundo volta ao máximo na
+   hora, e vocês escapam da casa. É a condição de vitória — não depende de
+   quantos erros vocês acumularam ou de quão bem jogaram, só do calendário.
 
 ## Cooperativo — irmãos e o sistema de disfarce
 
@@ -95,7 +100,8 @@ Source/HouseOfSanity/
 │   └── FallDeathVolume.h/.cpp            Chão real embaixo (sempre letal, servidor)
 └── UI/
     ├── MainHUDWidget.h/.cpp              Base C++ do HUD (bind de sanidade/fase)
-    └── GameOverWidget.h/.cpp             Base C++ da tela de morte
+    ├── GameOverWidget.h/.cpp             Base C++ da tela de morte
+    └── VictoryWidget.h/.cpp              Base C++ da tela de fuga (dia 70)
 ```
 
 Todas as classes de IA usam `AAIController::MoveToActor`/`MoveToLocation`
@@ -107,15 +113,22 @@ consigo criar neste ambiente.
 
 - **`AHouseOfSanityGameState`** é a única fonte de verdade sobre dia/noite:
   só o servidor avança o relógio (`Tick` sai cedo se `!HasAuthority()`), e
-  `CurrentDay`/`CurrentPhase`/`bGameOver` são `Replicated` para todo mundo
-  ver a mesma coisa. Isso substitui uma versão anterior baseada num
-  `WorldSubsystem` local — que funcionaria sozinho, mas cada cliente teria
-  seu próprio relógio dessincronizado assim que houvesse mais de um jogador.
+  `CurrentDay`/`CurrentPhase`/`bGameOver`/`bHasEscaped` são `Replicated` para
+  todo mundo ver a mesma coisa. Isso substitui uma versão anterior baseada
+  num `WorldSubsystem` local — que funcionaria sozinho, mas cada cliente
+  teria seu próprio relógio dessincronizado assim que houvesse mais de um
+  jogador. Ao chegar no `EscapeDayNumber` (dia 70 por padrão), o relógio
+  chama `TriggerMotherRescue()` e para de vez (`Tick` sai cedo se
+  `bHasEscaped`) — não tem mais dia depois disso, o jogo terminou.
 - **`AHouseOfSanityGameMode` só existe no servidor** (comportamento padrão da
   Unreal) — por isso a tela de game over não pode viver lá: `HandlePlayerDeath()`
   apenas repassa a decisão para `GameState->NotifyGameOver()`, que É replicado
   e dispara a apresentação (widget, input mode) em cada cliente
-  independentemente via `OnRep_GameOver`.
+  independentemente via `OnRep_GameOver`. A fuga do dia 70 segue exatamente
+  o mesmo padrão (`bHasEscaped`/`OnRep_HasEscaped`/`VictoryWidgetClass`),
+  só que é o próprio `GameState` que decide disparar sozinho, sem passar
+  pelo GameMode — não existe um "evento de morte" externo para escutar aqui,
+  é só o calendário chegando no dia certo.
 - **Sanidade de cada jogador é local por natureza**: o que decide se você
   vê alucinações, se um irmão vira entidade pros seus olhos, ou se o
   pula-pula parece real, é sempre a sanidade do jogador que está *olhando* —
@@ -168,11 +181,13 @@ Nada disso é opcional: sem esses passos o projeto abre mas não é jogável.
 6. **Tarefas**: criar Blueprints filhos das 4 classes em `Chores/` (malha da
    pia/cama/vassoura/lixo, posição na casa) e implementar os eventos
    `OnMarkerUpdated`/`OnChoreOutcome` para tocar VFX/SFX/animação.
-7. **UI**: criar `WBP_MainHUD` (filho de `UMainHUDWidget`) e `WBP_GameOver`
-   (filho de `UGameOverWidget`) em UMG; atribuir `WBP_GameOver` no campo
-   `GameOverWidgetClass` de um `BP_HouseOfSanityGameState` (filho de
-   `AHouseOfSanityGameState`), e configurar esse Blueprint como GameState
-   padrão do mapa/projeto.
+7. **UI**: criar `WBP_MainHUD` (filho de `UMainHUDWidget`), `WBP_GameOver`
+   (filho de `UGameOverWidget`) e `WBP_Victory` (filho de `UVictoryWidget`)
+   em UMG; atribuir `WBP_GameOver`/`WBP_Victory` nos campos
+   `GameOverWidgetClass`/`VictoryWidgetClass` de um `BP_HouseOfSanityGameState`
+   (filho de `AHouseOfSanityGameState`), e configurar esse Blueprint como
+   GameState padrão do mapa/projeto. `WBP_Victory` é a tela do dia 70 — a
+   chinelada da mãe e a fuga.
 8. **Distorção visual**: criar uma `Material Parameter Collection` chamada
    `MPC_Sanity` com um parâmetro escalar `Distortion`, atribuir em
    `HallucinationSubsystem::SanityMPC` (via `DefaultGame.ini` ou Blueprint), e
@@ -189,6 +204,11 @@ Nada disso é opcional: sem esses passos o projeto abre mas não é jogável.
 11. **Multiplayer**: posicionar múltiplos `PlayerStart` (um por irmão) e
     testar com "Number of Players" > 1 no PIE (Play In Editor) para checar
     o disfarce entre irmãos e a sincronização do ciclo dia/noite.
+12. **Cutscene da chinelada**: ligar `GameState->OnMotherRescue` (dispara com
+    o número do dia) a uma sequência real — Level Sequence com a mãe
+    entrando, animação da chinelada, e então `WBP_Victory` na tela. Ajustar
+    `EscapeDayNumber` em `DefaultGame.ini` se 70 dias for longo demais para
+    testar no editor (reduzir temporariamente para validar o fluxo).
 
 ## Por que não há Behavior Tree / Blackboard
 
