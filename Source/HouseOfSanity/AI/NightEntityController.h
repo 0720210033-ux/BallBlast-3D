@@ -31,12 +31,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Entity AI")
 	float SightAge = 5.f;
 
+	// Wandering stays within this radius of where the entity was placed, so
+	// with several entities spread through a multi-room house they keep
+	// covering their own area instead of all drifting toward the same spot.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Entity AI")
+	float WanderRadius = 1200.f;
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
 
 private:
 	void UpdateBehavior();
+	APawn* FindMostVulnerablePerceivedPawn() const;
 
 	UFUNCTION()
 	void HandlePerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
@@ -48,5 +55,6 @@ private:
 	TObjectPtr<ANightEntity> ControlledEntity;
 
 	FTimerHandle BehaviorTimerHandle;
-	bool bCanSeePlayer = false;
+	FVector PatrolOrigin = FVector::ZeroVector;
+	TArray<TWeakObjectPtr<APawn>> PerceivedPawns;
 };

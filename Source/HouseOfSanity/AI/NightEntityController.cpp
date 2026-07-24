@@ -1,12 +1,12 @@
 #include "AI/NightEntityController.h"
 #include "AI/NightEntity.h"
-#include "Systems/DayNightSubsystem.h"
+#include "HouseOfSanityGameState.h"
 #include "Components/SanityComponent.h"
 #include "HouseOfSanityGameMode.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Sight.h"
-#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerState.h"
 #include "NavigationSystem.h"
 
 ANightEntityController::ANightEntityController()
@@ -33,6 +33,7 @@ void ANightEntityController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 
 	ControlledEntity = Cast<ANightEntity>(InPawn);
+	PatrolOrigin = InPawn ? InPawn->GetActorLocation() : FVector::ZeroVector;
 	GetWorldTimerManager().SetTimer(BehaviorTimerHandle, this, &ANightEntityController::UpdateBehavior, BehaviorUpdateInterval, true);
 }
 
@@ -45,10 +46,54 @@ void ANightEntityController::OnUnPossess()
 
 void ANightEntityController::HandlePerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	if (Actor && Actor->IsA<APawn>())
+	APawn* SensedPawn = Cast<APawn>(Actor);
+	if (!SensedPawn)
 	{
-		bCanSeePlayer = Stimulus.WasSuccessfullySensed();
+		return;
 	}
+
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		PerceivedPawns.AddUnique(SensedPawn);
+	}
+	else
+	{
+		PerceivedPawns.RemoveAll([SensedPawn](const TWeakObjectPtr<APawn>& Weak) { return Weak.Get() == SensedPawn; });
+	}
+}
+
+APawn* ANightEntityController::FindMostVulnerablePerceivedPawn() const
+{
+	APawn* BestPawn = nullptr;
+	ESanityTier BestTier = ESanityTier::Stable;
+	float BestDistance = TNumericLimits<float>::Max();
+
+	for (const TWeakObjectPtr<APawn>& WeakPawn : PerceivedPawns)
+	{
+		APawn* Pawn = WeakPawn.Get();
+		if (!Pawn)
+		{
+			continue;
+		}
+
+		const USanityComponent* Sanity = Pawn->FindComponentByClass<USanityComponent>();
+		if (!Sanity)
+		{
+			continue;
+		}
+
+		const ESanityTier Tier = Sanity->GetSanityTier();
+		const float Distance = ControlledEntity ? FVector::Dist(ControlledEntity->GetActorLocation(), Pawn->GetActorLocation()) : 0.f;
+
+		if (!BestPawn || Tier > BestTier || (Tier == BestTier && Distance < BestDistance))
+		{
+			BestPawn = Pawn;
+			BestTier = Tier;
+			BestDistance = Distance;
+		}
+	}
+
+	return BestPawn;
 }
 
 void ANightEntityController::UpdateBehavior()
@@ -58,47 +103,37 @@ void ANightEntityController::UpdateBehavior()
 		return;
 	}
 
-	const UDayNightSubsystem* DayNight = GetWorld()->GetSubsystem<UDayNightSubsystem>();
-	if (!DayNight || !DayNight->IsNight())
+	const AHouseOfSanityGameState* GameState = GetWorld()->GetGameState<AHouseOfSanityGameState>();
+	if (!GameState || !GameState->IsNight())
 	{
 		ControlledEntity->SetEntityState(EEntityState::Dormant);
 		StopMovement();
 		return;
 	}
 
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	USanityComponent* Sanity = PlayerPawn ? PlayerPawn->FindComponentByClass<USanityComponent>() : nullptr;
-	if (!PlayerPawn || !Sanity)
-	{
-		return;
-	}
+	APawn* TargetPawn = FindMostVulnerablePerceivedPawn();
+	USanityComponent* TargetSanity = TargetPawn ? TargetPawn->FindComponentByClass<USanityComponent>() : nullptr;
 
 	EEntityState DesiredState = EEntityState::Wandering;
-	switch (Sanity->GetSanityTier())
+	if (TargetSanity)
 	{
-		case ESanityTier::Stable:
-		case ESanityTier::Uneasy:
-			DesiredState = EEntityState::Wandering;
-			break;
-		case ESanityTier::Disturbed:
-			DesiredState = EEntityState::Stalking;
-			break;
-		case ESanityTier::Critical:
-		case ESanityTier::Lost:
-			DesiredState = EEntityState::Hunting;
-			break;
-	}
-
-	// Without a perceived player, the entity searches rather than beelines -
-	// low sanity raises the stakes, it doesn't grant omniscience.
-	if (!bCanSeePlayer && DesiredState != EEntityState::Wandering)
-	{
-		DesiredState = EEntityState::Wandering;
+		switch (TargetSanity->GetSanityTier())
+		{
+			case ESanityTier::Stable:
+			case ESanityTier::Uneasy:
+				DesiredState = EEntityState::Wandering;
+				break;
+			case ESanityTier::Disturbed:
+				DesiredState = EEntityState::Stalking;
+				break;
+			case ESanityTier::Critical:
+			case ESanityTier::Lost:
+				DesiredState = EEntityState::Hunting;
+				break;
+		}
 	}
 
 	ControlledEntity->SetEntityState(DesiredState);
-
-	const float DistanceToPlayer = FVector::Dist(ControlledEntity->GetActorLocation(), PlayerPawn->GetActorLocation());
 
 	switch (DesiredState)
 	{
@@ -109,7 +144,7 @@ void ANightEntityController::UpdateBehavior()
 				if (UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld()))
 				{
 					FNavLocation RandomLocation;
-					if (NavSystem->GetRandomReachablePointInRadius(ControlledEntity->GetActorLocation(), 1500.f, RandomLocation))
+					if (NavSystem->GetRandomReachablePointInRadius(PatrolOrigin, WanderRadius, RandomLocation))
 					{
 						MoveToLocation(RandomLocation.Location);
 					}
@@ -119,9 +154,10 @@ void ANightEntityController::UpdateBehavior()
 		}
 		case EEntityState::Stalking:
 		{
-			if (DistanceToPlayer > StalkingDistance)
+			const float DistanceToTarget = FVector::Dist(ControlledEntity->GetActorLocation(), TargetPawn->GetActorLocation());
+			if (DistanceToTarget > StalkingDistance)
 			{
-				MoveToActor(PlayerPawn, StalkingDistance);
+				MoveToActor(TargetPawn, StalkingDistance);
 			}
 			else
 			{
@@ -131,10 +167,11 @@ void ANightEntityController::UpdateBehavior()
 		}
 		case EEntityState::Hunting:
 		{
-			MoveToActor(PlayerPawn, ControlledEntity->AttackRange * 0.8f);
-			if (DistanceToPlayer <= ControlledEntity->AttackRange)
+			MoveToActor(TargetPawn, ControlledEntity->AttackRange * 0.8f);
+			const float DistanceToTarget = FVector::Dist(ControlledEntity->GetActorLocation(), TargetPawn->GetActorLocation());
+			if (DistanceToTarget <= ControlledEntity->AttackRange)
 			{
-				if (ControlledEntity->TryAttack(PlayerPawn))
+				if (ControlledEntity->TryAttack(TargetPawn))
 				{
 					if (AHouseOfSanityGameMode* GameMode = GetWorld()->GetAuthGameMode<AHouseOfSanityGameMode>())
 					{

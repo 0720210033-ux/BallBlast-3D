@@ -8,6 +8,7 @@
 UInteractionComponent::UInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 }
 
 void UInteractionComponent::BeginPlay()
@@ -68,6 +69,23 @@ void UInteractionComponent::TryInteract()
 		return;
 	}
 
+	if (!GetOwner()->HasAuthority())
+	{
+		ServerTryInteract(Focused);
+		return;
+	}
+
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	IInteractableInterface::Execute_Interact(Focused, OwnerPawn);
+}
+
+void UInteractionComponent::ServerTryInteract_Implementation(AActor* Target)
+{
+	if (!Target || !Target->Implements<UInteractableInterface>())
+	{
+		return;
+	}
+
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	IInteractableInterface::Execute_Interact(Target, OwnerPawn);
 }

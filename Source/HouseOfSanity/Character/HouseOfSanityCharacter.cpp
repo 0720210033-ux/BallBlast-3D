@@ -1,11 +1,14 @@
 #include "Character/HouseOfSanityCharacter.h"
 #include "Components/SanityComponent.h"
 #include "Components/InteractionComponent.h"
+#include "Components/SiblingAppearanceComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Net/UnrealNetwork.h"
 
 AHouseOfSanityCharacter::AHouseOfSanityCharacter()
 {
@@ -20,6 +23,19 @@ AHouseOfSanityCharacter::AHouseOfSanityCharacter()
 
 	SanityComponent = CreateDefaultSubobject<USanityComponent>(TEXT("SanityComponent"));
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	AppearanceComponent = CreateDefaultSubobject<USiblingAppearanceComponent>(TEXT("AppearanceComponent"));
+
+	DisguiseMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DisguiseMesh"));
+	DisguiseMesh->SetupAttachment(GetMesh());
+	DisguiseMesh->SetVisibility(false);
+	DisguiseMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AHouseOfSanityCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AHouseOfSanityCharacter, SiblingIndex);
 }
 
 void AHouseOfSanityCharacter::BeginPlay()

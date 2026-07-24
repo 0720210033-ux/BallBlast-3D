@@ -1,5 +1,5 @@
 #include "Systems/HallucinationSubsystem.h"
-#include "Systems/DayNightSubsystem.h"
+#include "HouseOfSanityGameState.h"
 #include "Components/SanityComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMaterialLibrary.h"
@@ -31,8 +31,8 @@ USanityComponent* GetPlayerSanityComponent(const UWorld* World)
 
 bool UHallucinationSubsystem::IsPlayerDeceivable() const
 {
-	const UDayNightSubsystem* DayNight = GetWorld()->GetSubsystem<UDayNightSubsystem>();
-	if (!DayNight || !DayNight->IsNight())
+	const AHouseOfSanityGameState* GameState = GetWorld()->GetGameState<AHouseOfSanityGameState>();
+	if (!GameState || !GameState->IsNight())
 	{
 		return false;
 	}
@@ -54,8 +54,8 @@ float UHallucinationSubsystem::GetEventChanceForTier(ESanityTier Tier) const
 
 void UHallucinationSubsystem::EvaluateHallucinationRisk()
 {
-	const UDayNightSubsystem* DayNight = GetWorld()->GetSubsystem<UDayNightSubsystem>();
-	if (!DayNight || !DayNight->IsNight())
+	const AHouseOfSanityGameState* GameState = GetWorld()->GetGameState<AHouseOfSanityGameState>();
+	if (!GameState || !GameState->IsNight())
 	{
 		return;
 	}
@@ -78,11 +78,11 @@ void UHallucinationSubsystem::EvaluateHallucinationRisk()
 
 void UHallucinationSubsystem::UpdateDistortionParameter(float DeltaTime)
 {
-	const UDayNightSubsystem* DayNight = GetWorld()->GetSubsystem<UDayNightSubsystem>();
+	const AHouseOfSanityGameState* GameState = GetWorld()->GetGameState<AHouseOfSanityGameState>();
 	const USanityComponent* Sanity = GetPlayerSanityComponent(GetWorld());
 
 	float Target = 0.f;
-	if (DayNight && DayNight->IsNight() && Sanity)
+	if (GameState && GameState->IsNight() && Sanity)
 	{
 		Target = FMath::Clamp((1.f - Sanity->GetSanityPercent()) * 1.2f, 0.f, 1.f);
 	}

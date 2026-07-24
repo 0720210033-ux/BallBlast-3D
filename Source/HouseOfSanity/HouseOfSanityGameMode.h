@@ -4,8 +4,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "HouseOfSanityGameMode.generated.h"
 
-class UGameOverWidget;
-
 UCLASS()
 class HOUSEOFSANITY_API AHouseOfSanityGameMode : public AGameModeBase
 {
@@ -14,18 +12,9 @@ class HOUSEOFSANITY_API AHouseOfSanityGameMode : public AGameModeBase
 public:
 	AHouseOfSanityGameMode();
 
-	// Assign a Blueprint widget (subclassing UGameOverWidget) in a Blueprint
-	// child of this GameMode - the widget asset itself can't be authored here.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
-	TSubclassOf<UGameOverWidget> GameOverWidgetClass;
-
+	// The actual game-over presentation lives on AHouseOfSanityGameState,
+	// since that's what's replicated to every connected sibling; this just
+	// forwards the server's authoritative decision that someone died.
 	UFUNCTION(BlueprintCallable, Category = "House of Sanity")
 	void HandlePlayerDeath();
-
-	UPROPERTY(BlueprintReadOnly, Category = "House of Sanity")
-	bool bGameOver = false;
-
-private:
-	UPROPERTY()
-	TObjectPtr<UGameOverWidget> GameOverWidgetInstance;
 };

@@ -31,13 +31,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chore")
 	float SweepSpeed = 2.f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Chore")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Chore")
 	bool bIsCompleted = false;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Chore")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Chore")
 	bool bIsFailed = false;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Chore")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Chore")
 	bool bInProgress = false;
 
 	UPROPERTY(BlueprintAssignable, Category = "Chore")
@@ -60,6 +60,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void BeginChore(APawn* Instigator);
 	void ResolveChore();

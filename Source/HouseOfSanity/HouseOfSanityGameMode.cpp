@@ -1,38 +1,17 @@
 #include "HouseOfSanityGameMode.h"
+#include "HouseOfSanityGameState.h"
 #include "Character/HouseOfSanityCharacter.h"
-#include "UI/GameOverWidget.h"
-#include "Kismet/GameplayStatics.h"
 
 AHouseOfSanityGameMode::AHouseOfSanityGameMode()
 {
 	DefaultPawnClass = AHouseOfSanityCharacter::StaticClass();
+	GameStateClass = AHouseOfSanityGameState::StaticClass();
 }
 
 void AHouseOfSanityGameMode::HandlePlayerDeath()
 {
-	if (bGameOver)
+	if (AHouseOfSanityGameState* GameState = GetGameState<AHouseOfSanityGameState>())
 	{
-		return;
+		GameState->NotifyGameOver();
 	}
-	bGameOver = true;
-
-	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-
-	if (GameOverWidgetClass && PC)
-	{
-		GameOverWidgetInstance = CreateWidget<UGameOverWidget>(PC, GameOverWidgetClass);
-		if (GameOverWidgetInstance)
-		{
-			GameOverWidgetInstance->AddToViewport();
-		}
-	}
-
-	if (PC)
-	{
-		FInputModeUIOnly InputMode;
-		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = true;
-	}
-
-	UGameplayStatics::SetGamePaused(this, true);
 }

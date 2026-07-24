@@ -33,4 +33,9 @@ protected:
 private:
 	FVector GetTraceStart() const;
 	FVector GetTraceDirection() const;
+
+	// Chores mutate replicated state, so a client-pressed interact has to be
+	// authorized through the pawn it owns before it can touch the target actor.
+	UFUNCTION(Server, Reliable)
+	void ServerTryInteract(AActor* Target);
 };

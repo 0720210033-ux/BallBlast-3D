@@ -7,6 +7,8 @@
 class UCameraComponent;
 class USanityComponent;
 class UInteractionComponent;
+class USiblingAppearanceComponent;
+class USkeletalMeshComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
@@ -28,6 +30,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "House of Sanity")
 	TObjectPtr<UInteractionComponent> InteractionComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "House of Sanity")
+	TObjectPtr<USiblingAppearanceComponent> AppearanceComponent;
+
+	// Hidden by default; USiblingAppearanceComponent shows this instead of
+	// the real mesh, per-viewer, once that viewer's own sanity is low enough.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "House of Sanity")
+	TObjectPtr<USkeletalMeshComponent> DisguiseMesh;
+
+	// Cosmetic identity only (which sibling this is / which skin to use) -
+	// assign per PlayerStart or via GameMode on spawn.
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "House of Sanity")
+	int32 SiblingIndex = 0;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
@@ -43,6 +58,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	void HandleMove(const FInputActionValue& Value);

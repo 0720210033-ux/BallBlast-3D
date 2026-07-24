@@ -1,24 +1,35 @@
 #include "Chores/ChoreBase.h"
 #include "Components/SanityComponent.h"
 #include "Components/SceneComponent.h"
-#include "Systems/DayNightSubsystem.h"
+#include "HouseOfSanityGameState.h"
 #include "GameFramework/Pawn.h"
+#include "Net/UnrealNetwork.h"
 
 AChoreBase::AChoreBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorTickEnabled(false);
+	bReplicates = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+}
+
+void AChoreBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AChoreBase, bIsCompleted);
+	DOREPLIFETIME(AChoreBase, bIsFailed);
+	DOREPLIFETIME(AChoreBase, bInProgress);
 }
 
 void AChoreBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UDayNightSubsystem* Subsystem = GetWorld()->GetSubsystem<UDayNightSubsystem>())
+	if (AHouseOfSanityGameState* GameState = GetWorld()->GetGameState<AHouseOfSanityGameState>())
 	{
-		Subsystem->OnNewDayBegin.AddDynamic(this, &AChoreBase::HandleNewDay);
+		GameState->OnNewDayBegin.AddDynamic(this, &AChoreBase::HandleNewDay);
 	}
 }
 
@@ -46,7 +57,10 @@ FText AChoreBase::GetInteractionPrompt_Implementation() const
 
 void AChoreBase::Interact_Implementation(APawn* Instigator)
 {
-	if (bIsCompleted)
+	// Mutates replicated state (bIsCompleted/bInProgress) and the instigator's
+	// sanity, so it must run where it's authoritative - UInteractionComponent
+	// routes client presses through a Server RPC before ever reaching here.
+	if (!HasAuthority() || bIsCompleted)
 	{
 		return;
 	}

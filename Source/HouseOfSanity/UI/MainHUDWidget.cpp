@@ -1,6 +1,6 @@
 #include "UI/MainHUDWidget.h"
 #include "Components/SanityComponent.h"
-#include "Systems/DayNightSubsystem.h"
+#include "HouseOfSanityGameState.h"
 #include "Kismet/GameplayStatics.h"
 
 void UMainHUDWidget::NativeConstruct()
@@ -15,9 +15,9 @@ void UMainHUDWidget::NativeConstruct()
 		}
 	}
 
-	if (UDayNightSubsystem* DayNight = GetWorld()->GetSubsystem<UDayNightSubsystem>())
+	if (AHouseOfSanityGameState* GameState = GetWorld()->GetGameState<AHouseOfSanityGameState>())
 	{
-		DayNight->OnTimePhaseChanged.AddDynamic(this, &UMainHUDWidget::HandleTimePhaseChanged);
+		GameState->OnTimePhaseChanged.AddDynamic(this, &UMainHUDWidget::HandleTimePhaseChanged);
 	}
 }
 
@@ -47,8 +47,8 @@ void UMainHUDWidget::HandleSanityChanged(float NewSanity, float Delta)
 
 void UMainHUDWidget::HandleTimePhaseChanged(ETimePhase NewPhase)
 {
-	if (const UDayNightSubsystem* DayNight = GetWorld()->GetSubsystem<UDayNightSubsystem>())
+	if (const AHouseOfSanityGameState* GameState = GetWorld()->GetGameState<AHouseOfSanityGameState>())
 	{
-		OnTimePhaseUpdated(NewPhase, DayNight->CurrentDay);
+		OnTimePhaseUpdated(NewPhase, GameState->CurrentDay);
 	}
 }
